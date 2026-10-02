@@ -121,10 +121,35 @@ const paymentWebhook = async (req, res) => {
       .update(req.rawBody)
       .digest("hex");
     if (hash == req.headers["x-paystack-signature"]) {
-      const { event } = req.body;
+      const { event, body } = req.body;
+      console.log(req.body);
+
+      if (event === "charge.success") {
+        await Payment.findOneAndUpdate(
+          { reference },
+          { status: "success" },
+
+          {
+            new: true,
+            runValidators: true,
+          },
+        );
+        res.status(StatusCodes.OK).json({
+          message: "Webhook verified",
+          status: true,
+          data: {
+            reference: body.reference,
+            status: "success",
+          },
+        });
+      }
     }
-  } catch (error) {
+  } catch {
     console.log(error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "Oops! Something went wrong",
+      status: false,
+    });
   }
 };
 
