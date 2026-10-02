@@ -1,8 +1,11 @@
-import express from "express";
+import express, { json } from "express";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import authRoute from "./routes/auth.route.js";
 import productRoute from "./routes/product.route.js";
+import paymentRoute from "./routes/payment.route.js";
+import swaggerUi from "swagger-ui-express";
+import swaggerDocument from "./swagger-output.json" with { type: "json" };
 import cors from "cors";
 dotenv.config();
 
@@ -11,6 +14,7 @@ const app = express();
 const PORT = process.env.PORT;
 const MONGO_URI = process.env.MONGO_URI;
 
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use(express.json());
 app.use(
   cors({
@@ -19,6 +23,8 @@ app.use(
 );
 app.use("/auth", authRoute);
 app.use("/product", productRoute);
+app.use("/pay", paymentRoute);
+// app.use("/pay/webhook", webhook)
 
 async function start() {
   try {
